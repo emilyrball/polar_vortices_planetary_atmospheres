@@ -5,7 +5,6 @@ import numpy as np
 import xarray as xr
 import os, sys
 
-import calculate_PV as cPV
 import colorcet as cc
 import string
 
@@ -17,8 +16,39 @@ import matplotlib.path as mpath
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
 
-from Isca_instantaneous_PV_all import (stereo_plot, make_stereo_plot,
-                                       make_colourmap)
+
+class nf(float):
+    def __repr__(self):
+        s = f'{self:.1f}'
+        return f'{self:.0f}' if s[-1] == '0' else s
+
+def stereo_plot():
+    '''
+    Returns variables to define a circular plot in matplotlib.
+    '''
+    theta = np.linspace(0, 2*np.pi, 100)
+    center, radius = [0.5, 0.5], 0.5
+    verts = np.vstack([np.sin(theta), np.cos(theta)]).T
+    circle = mpath.Path(verts * radius + center)
+    return theta, center, radius, verts, circle
+
+def make_stereo_plot(ax, lats, lons, circle, **kwargs):
+    '''
+    Makes the polar stereographic plot and plots gridlines at choice of lats
+    and lons.
+    '''
+    linewidth = kwargs.pop('linewidth', 1)
+    linestyle = kwargs.pop('linestyle', '-')
+    color = kwargs.pop('color', 'black')
+    alpha = kwargs.pop('alpha', 1)
+
+    gl = ax.gridlines(crs = ccrs.PlateCarree(), linewidth = linewidth,
+                      linestyle = linestyle, color = color, alpha = alpha)
+
+    ax.set_boundary(circle, transform=ax.transAxes)
+
+    gl.ylocator = ticker.FixedLocator(lats)
+    gl.xlocator = ticker.FixedLocator(lons)
 
 def calc_jet_lat(u, lats, plot=False):
     """Function to calculate location and strenth of maximum given zonal wind
@@ -43,6 +73,52 @@ def calc_jet_lat(u, lats, plot=False):
         plt.show()
 
     return jet_lat, jet_max
+  
+def make_colourmap(vmin, vmax, step, **kwargs):
+    '''
+    Makes a colormap from ``vmin`` (inclusive) to ``vmax`` (exclusive) with
+    boundaries incremented by ``step``. Optionally includes choice of color and
+    to extend the colormap.
+    '''
+    col = kwargs.pop('col', 'viridis')
+    extend = kwargs.pop('extend', 'both')
+
+    boundaries = list(np.arange(vmin, vmax, step))
+
+    if extend == 'both':
+        cmap_new = cm.get_cmap(col, len(boundaries) + 1)
+        colours = list(cmap_new(np.arange(len(boundaries) + 1)))
+        cmap = colors.ListedColormap(colours[1:-1],"")
+        cmap.set_over(colours[-1])
+        cmap.set_under(colours[0])
+
+    elif extend == 'max':
+        cmap_new = cm.get_cmap(col, len(boundaries))
+        colours = list(cmap_new(np.arange(len(boundaries))))
+        cmap = colors.ListedColormap(colours[:-1],"")
+        cmap.set_over(colours[-1])
+
+    elif extend == 'min':
+        cmap_new = cm.get_cmap(col, len(boundaries))
+        colours = list(cmap_new(np.arange(len(boundaries))))
+        cmap = colors.ListedColormap(colours[1:],"")
+        cmap.set_under(colours[0])
+
+    norm = colors.BoundaryNorm(boundaries, ncolors = len(boundaries) - 1,
+                               clip = False)
+
+    return boundaries, cmap_new, colours, cmap, norm
+  
+def lait(PV,theta,theta0, **kwargs):
+    r"""Perform Lait scaling of PV
+    kwargs
+    ------
+    kappa: R/c_p, optional, defaults to 0.25.
+    """
+    kappa = kwargs.pop('kappa', 0.25)
+    ret = PV*(theta/theta0)**(-(1+1/kappa))
+
+    return ret
 
 if __name__ == "__main__":
 
@@ -102,7 +178,7 @@ if __name__ == "__main__":
 
     # Lait scale PV
     theta = x.ilev
-    laitPV = cPV.lait(x.PV,theta,theta0,kappa=kappa)
+    laitPV = lait(x.PV,theta,theta0,kappa=kappa)
     x["scaled_PV"]=laitPV
 
     for i, ax in enumerate(fig.axes):
@@ -130,7 +206,7 @@ if __name__ == "__main__":
         c0 = ax.contour(x0.lon, x0.lat, x0.uwnd,levels=[0,40,80,120],colors='0.1',
                         transform=ccrs.PlateCarree(),linewidths = 0.8)
 
-        c0.levels = [cPV.nf(val) for val in c0.levels]
+        c0.levels = [nf(val) for val in c0.levels]
 
         ax.clabel(c0, c0.levels, inline=1, fmt=fmt, fontsize=16)
         
