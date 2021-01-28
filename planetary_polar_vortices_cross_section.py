@@ -23,8 +23,7 @@ import xarray as xr
 
 import colorcet as cc
 import os, sys
-import PVmodule_Emily as PVmod
-import calculate_PV as cPV
+import PVmodule as PVmod
 import string
 
 from cartopy import crs as ccrs
@@ -32,10 +31,54 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from matplotlib import (cm, colors)
 
-from Isca_instantaneous_PV_all import make_colourmap
+def make_colourmap(vmin, vmax, step, **kwargs):
+    '''
+    Makes a colormap from ``vmin`` (inclusive) to ``vmax`` (exclusive) with
+    boundaries incremented by ``step``. Optionally includes choice of color and
+    to extend the colormap.
+    '''
+    col = kwargs.pop('col', 'viridis')
+    extend = kwargs.pop('extend', 'both')
+
+    boundaries = list(np.arange(vmin, vmax, step))
+
+    if extend == 'both':
+        cmap_new = cm.get_cmap(col, len(boundaries) + 1)
+        colours = list(cmap_new(np.arange(len(boundaries) + 1)))
+        cmap = colors.ListedColormap(colours[1:-1],"")
+        cmap.set_over(colours[-1])
+        cmap.set_under(colours[0])
+
+    elif extend == 'max':
+        cmap_new = cm.get_cmap(col, len(boundaries))
+        colours = list(cmap_new(np.arange(len(boundaries))))
+        cmap = colors.ListedColormap(colours[:-1],"")
+        cmap.set_over(colours[-1])
+
+    elif extend == 'min':
+        cmap_new = cm.get_cmap(col, len(boundaries))
+        colours = list(cmap_new(np.arange(len(boundaries))))
+        cmap = colors.ListedColormap(colours[1:],"")
+        cmap.set_under(colours[0])
+
+    norm = colors.BoundaryNorm(boundaries, ncolors = len(boundaries) - 1,
+                               clip = False)
+
+    return boundaries, cmap_new, colours, cmap, norm
+
+def laitMars(PV,theta,theta0, **kwargs):
+    r"""Perform Lait scaling of PV
+    kwargs
+    ------
+    kappa: R/c_p, optional, defaults to 0.25.
+    """
+    kappa = kwargs.pop('kappa', 0.25)
+    ret = PV*(theta/theta0)**(-(1+1/kappa))
+
+    return ret
 
 
-def lait(PV,theta,theta0, **kwargs):
+def laitTitan(PV,theta,theta0, **kwargs):
     r"""Perform Lait scaling of PV
     kwargs
     ------
@@ -369,7 +412,7 @@ if __name__ == "__main__":
 
 
     thta = PVmod.potential_temperature(temp.plev, temp, kappa=kappa, p0=p0)
-    lait_PV = lait(d.PV, d.theta, theta_0, kappa=kappa)
+    lait_PV = laitTitan(d.PV, d.theta, theta_0, kappa=kappa)
 
     thta = thta.where(Lsmin <= thta.Ls, drop = True)
     thta = thta.where(thta.Ls <= Lsmax, drop = True)
@@ -440,7 +483,7 @@ if __name__ == "__main__":
     d = d.where(Lsmin <= d.Ls, drop = True)
     d = d.where(d.Ls <= Lsmax, drop = True)
 
-    lait = cPV.lait(d.PV, d.theta, theta_0, kappa=kappa)
+    lait = laitMars(d.PV, d.theta, theta_0, kappa=kappa)
 
     pv = lait.mean(dim='time').mean(dim='lon') *10**5
 
