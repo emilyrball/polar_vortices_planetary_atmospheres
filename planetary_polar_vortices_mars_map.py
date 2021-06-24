@@ -5,7 +5,8 @@ import numpy as np
 import xarray as xr
 import os, sys
 
-import calculate_PV as cPV
+import analysis_functions as funcs
+import PVmodule as PV
 import colorcet as cc
 import string
 
@@ -16,9 +17,6 @@ from matplotlib import (cm, colors)
 import matplotlib.path as mpath
 
 from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
-
-from Isca_instantaneous_PV_all import (stereo_plot, make_stereo_plot,
-                                       make_colourmap)
 
 def calc_jet_lat(u, lats, plot=False):
     """Function to calculate location and strenth of maximum given zonal wind
@@ -77,7 +75,7 @@ if __name__ == "__main__":
     x = x.where(x.MY >= 28, drop = True)
     latm = d.lat.max().values
 
-    theta, center, radius, verts, circle = stereo_plot()
+    theta, center, radius, verts, circle = funcs.stereo_plot()
 
 
     fig, axs = plt.subplots(nrows=1,ncols=2, figsize = (14,8),
@@ -88,7 +86,7 @@ if __name__ == "__main__":
     vmax = 81
     step = 5
 
-    boundaries0, _, _, cmap0, norm0 = make_colourmap(vmin, vmax, step,
+    boundaries0, _, _, cmap0, norm0 = funcs.make_colourmap(vmin, vmax, step,
                                                 col = 'OrRd', extend = 'both')
 
 
@@ -100,12 +98,12 @@ if __name__ == "__main__":
 
     # Lait scale PV
     theta = x.ilev
-    laitPV = cPV.lait(x.PV,theta,theta0,kappa=kappa)
+    laitPV = funcs.lait(x.PV,theta,theta0,kappa=kappa)
     x["scaled_PV"]=laitPV
     ds = []
 
     for i, ax in enumerate(fig.axes):
-        make_stereo_plot(ax, [latm, 80, 70, 60, 50],
+        funcs.make_stereo_plot(ax, [latm, 80, 70, 60, 50],
                         [-180, -120, -60, 0, 60, 120, 180],
                         circle, alpha = 0.3, linestyle = '--',)
         ax.text(0.05, 0.95, string.ascii_lowercase[i], transform=ax.transAxes, 
@@ -132,7 +130,7 @@ if __name__ == "__main__":
         c0 = ax.contour(x0.lon, x0.lat, x0.uwnd,levels=[0,40,80,120],colors='0.1',
                         transform=ccrs.PlateCarree(),linewidths = 0.8)
 
-        c0.levels = [cPV.nf(val) for val in c0.levels]
+        c0.levels = [funcs.nf(val) for val in c0.levels]
 
         ax.clabel(c0, c0.levels, inline=1, fmt=fmt, fontsize=16)
         
