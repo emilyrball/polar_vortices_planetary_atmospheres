@@ -16,3 +16,6 @@ Potential vorticity is calculated using the script PVmodule.py, along with other
 ## analysis_functions.py
 Various useful functions, including Lait-scaling for potential vorticity.
 
+## calculate_PV_venus.py
+Calculates PV from AFES-Venus reanalysis data.
+
