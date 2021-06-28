@@ -1,0 +1,271 @@
+#!/bin/csh
+gmtset PAPER_MEDIA A4+ LABEL_FONT_SIZE 16p HEADER_FONT_SIZE 16p ANNOT_FONT_SIZE 16p
+
+# simple check to see if GMT is installed
+set gmttest = ` psxy |& wc -l | awk '{print $1}' `
+if ( $gmttest < 100 ) then
+  echo "NB This script required Generic Mapping Tools v4 to run."
+  break
+else
+  echo "GMT seems to be OK - running script"
+endif
+
+# output plotname
+set plot = "plot_titanvortex.eps"
+
+# plot dimensions
+set LatLimForPV = 20
+
+set xdim = 2.75i
+set ydim = 1.75i
+set xoff = 4i
+set yoff = 2.75i
+set yoff2 = 5.5i
+set scaledim = 2.85i/.875i/$ydim/.1i
+
+set tmin   =  2004.4
+set tmax   =  2018
+set latmin =  -90
+set latmax =   90
+
+#---------------------------
+# grid data for plotting
+#---------------------------
+
+foreach file ( plot_titanvortex_HC3N.dat plot_titanvortex_PV_0.1mbar.dat plot_titanvortex_T_1mbar.dat )
+    echo fitting surface to $file
+    set grid = -I0.25/2.5
+    surface $file -R$tmin/$tmax/-90/90 $grid -T1 -G$file.grd
+end
+
+foreach file ( plot_titanvortex_HC3N.dat plot_titanvortex_PV_0.1mbar.dat plot_titanvortex_T_1mbar.dat )
+   grdinfo -C $file.grd
+end
+
+
+#---------------------------
+# bbox
+#---------------------------
+
+psxy -JX13i/3.5i -R0/1/0/1 -W1 -X0i -Y0i -K -P <<END> $plot
+END
+
+
+#------------------------------------------------------------
+#------------------------------------------------------------
+# TEMPERATURE
+#------------------------------------------------------------
+#------------------------------------------------------------
+
+set mint = 115
+set maxt = 175
+set dt   = 1
+makecpt -T"$mint"/"$maxt"/"$dt" -Chaxby > tmp.cpt
+
+#---------------------------
+# bbox
+#---------------------------
+
+psxy -JX$xdim/$ydim -R0/1/0/1 -W1 -X1i -Y1i -K -O <<END>> $plot
+END
+
+#---------------------------
+# contours
+#---------------------------
+
+psxy -JX$xdim/$ydim -R0/1/0/1 -G220 -O -K <<END>> $plot
+0 0
+0 1
+1 1
+1 0
+0 0
+END
+psclip plot_titanvortex.poly -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -B1a3:"Year":/10a30:"Latitude (@~\260@~N)"::".":WSe -O -K >> $plot
+grdimage plot_titanvortex_T_1mbar.dat.grd -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -Ctmp.cpt -B1a3:"Year":/10a30:"Latitude (@~\260@~)"::".":WSe -O -K >> $plot
+psclip -C -O -K >> $plot
+
+# annotations
+psxy plot_titanvortex_northvortex.txt -JX -R -W3/0t20_10:10 -K -O >> $plot
+psxy plot_titanvortex_southvortex.txt -JX -R -W3/0t20_10:10 -K -O >> $plot
+
+# equinox
+psxy -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -W3to -K -O <<END>> $plot
+2009.608 $latmin
+2009.608 $latmax
+END
+
+# solstice
+psxy -JX -R -W3to -K -O <<END>> $plot
+2017.388 $latmin
+2017.388 $latmax
+END
+
+# Ls ticks
+psxy -JX"$xdim"/0.1i -R"$tmin"/"$tmax"/0/1 -B100a100:"":/1a1:""::".":s -W1 -K -O -N -Y"$ydim" <<END>> $plot
+END
+pstext plot_titanvortex_yls.labels -JX -R -K -O -N >> $plot
+psxy   plot_titanvortex_yls.ticks  -JX -R -W1 -K -O -m -N >> $plot
+
+# labels
+pstext -JX$xdim/$ydim -R0/10/0/10 -K -O -Y-"$ydim" -N <<END>> $plot
+0.25   9.2  14 0 1 5 (a)
+10.4  12.2  14 0 1 5 Temp
+10.4  11.2  12 0 1 5 [K]
+5     13    18 0 0 6 L@-s@-
+END
+
+#---------------------------
+# scalebar
+#---------------------------
+psscale -D$scaledim -O -K -Ctmp.cpt -B5a20::/:"": >> $plot
+
+#------------------------------------------------------------
+#------------------------------------------------------------
+# PV
+#------------------------------------------------------------
+#------------------------------------------------------------
+
+set mint = -0.01
+set maxt =  0.01
+set dt   = 0.001
+makecpt -T"$mint"/"$maxt"/"$dt" -Cpolar > tmp.cpt
+
+#---------------------------
+# bbox
+#---------------------------
+
+psxy -JX$xdim/$ydim -R0/1/0/1 -W1 -X$xoff -Y0i -K -O <<END>> $plot
+END
+
+#---------------------------
+# contours
+#---------------------------
+
+psxy -JX$xdim/$ydim -R0/1/0/1 -G220 -O -K <<END>> $plot
+0 0
+0 1
+1 1
+1 0
+0 0
+END
+psclip plot_titanvortex.poly -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -B1a3:"Year":/10a30:"Latitude (@~\260@~)"::".":wSe -O -K >> $plot
+grdimage plot_titanvortex_PV_0.1mbar.dat.grd -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -Ctmp.cpt -B1a3:"Year":/10a30:"Latitude (@~\260@~)"::".":wSe -O -K >> $plot
+psclip -C -O -K >> $plot
+psxy -JX -R -G220 -K -O <<END>> $plot
+2004.5 $LatLimForPV
+2017.9 $LatLimForPV
+2017.9 -$LatLimForPV
+2004.5 -$LatLimForPV
+END
+
+# annotations
+psxy plot_titanvortex_northvortex.txt -JX -R -W3/0t20_10:10 -K -O >> $plot
+psxy plot_titanvortex_southvortex.txt -JX -R -W3/0t20_10:10 -K -O >> $plot
+
+# equinox
+psxy -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -W3to -K -O <<END>> $plot
+2009.608 $latmin
+2009.608 $latmax
+END
+
+# solstice
+psxy -JX -R -W3to -K -O <<END>> $plot
+2017.388 $latmin
+2017.388 $latmax
+END
+
+# Ls ticks
+psxy -JX"$xdim"/0.1i -R"$tmin"/"$tmax"/0/1 -B100a100:"":/1a1:""::".":s -W1 -K -O -N -Y"$ydim" <<END>> $plot
+END
+pstext plot_titanvortex_yls.labels -JX -R -K -O -N >> $plot
+psxy plot_titanvortex_yls.ticks    -JX -R -W1 -K -O -m -N >> $plot
+
+# labels
+pstext -JX$xdim/$ydim -R0/10/0/10 -K -O -Y-"$ydim" -N <<END>> $plot
+0.25   9.2  14 0 1 5 (b)
+10.4  12.2  14 0 1 5 PV
+10.4  11.2  12 0 1 5 [m@+2@+s@+-1@+Kkg@+-1@+]
+5     13    18 0 0 6 L@-s@-
+END
+
+#---------------------------
+# scalebar
+#---------------------------
+psscale -D$scaledim -O -K -Ctmp.cpt -B0.002a0.01::/:"": >> $plot
+
+
+#------------------------------------------------------------
+#------------------------------------------------------------
+# HC3N
+#------------------------------------------------------------
+#------------------------------------------------------------
+
+set mint = -10
+set maxt = -6.75
+set dt   = 0.1
+makecpt -T"$mint"/"$maxt"/"$dt" -Chaxby > tmp.cpt
+
+#---------------------------
+# bbox
+#---------------------------
+
+psxy -JX$xdim/$ydim -R0/1/0/1 -W1 -X"$xoff" -Y0i -K -O <<END>> $plot
+END
+
+#---------------------------
+# contours
+#---------------------------
+
+psxy -JX$xdim/$ydim -R0/1/0/1 -G220 -O -K <<END>> $plot
+0 0
+0 1
+1 1
+1 0
+0 0
+END
+psclip plot_titanvortex.poly -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -B1a3:"Year":/10a30:"Latitude (@~\260@~)"::".":wSe -O -K >> $plot
+grdimage plot_titanvortex_HC3N.dat.grd -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -B1a3:"Year":/10a30:"Latitude (@~\260@~)"::".":wSe -Ctmp.cpt -O -K >> $plot
+psclip -C -O -K >> $plot
+
+# annotations
+psxy plot_titanvortex_northvortex.txt -JX -R -W3/0t20_10:10 -K -O >> $plot
+psxy plot_titanvortex_southvortex.txt -JX -R -W3/0t20_10:10 -K -O >> $plot
+
+# equinox
+psxy -JX$xdim/$ydim -R$tmin/$tmax/$latmin/$latmax -W3to -K -O <<END>> $plot
+2009.608 $latmin
+2009.608 $latmax
+END
+
+# solstice
+psxy -JX -R -W3to -K -O <<END>> $plot
+2017.388 $latmin
+2017.388 $latmax
+END
+
+# Ls ticks
+psxy -JX"$xdim"/0.1i -R"$tmin"/"$tmax"/0/1 -B100a100:"":/1a1:""::".":s -W1 -K -O -N -Y"$ydim" <<END>> $plot
+END
+pstext plot_titanvortex_yls.labels -JX -R -K -O -N >> $plot
+psxy   plot_titanvortex_yls.ticks  -JX -R -W1 -K -O -m -N >> $plot
+
+# labels
+pstext -JX$xdim/$ydim -R0/10/0/10 -K -O -Y-"$ydim" -N <<END>> $plot
+0.25   9.2  14 0 1 5 (c)
+10.4  12.2  14 0 1 5 HC@-3@-N
+10.4  11.2  12 0 1 5 [log@-10@-(VMR)]
+5     13    18 0 0 6 L@-s@-
+END
+
+#---------------------------
+# scalebar
+#---------------------------
+psscale -D$scaledim -O -K -Ctmp.cpt -B0.5a1::/:"": >> $plot
+
+#---------------------------
+# finish up
+#---------------------------
+psxy -JX -R -W1 -O <<END>> $plot
+END
+
+
