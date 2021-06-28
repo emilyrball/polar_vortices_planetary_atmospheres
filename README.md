@@ -25,15 +25,25 @@ GMT shell script to plot figure 6
 plot_titanvortex.gmt			main GMT plotting script
 
 plot_titanvortex.poly			mask for regions where observations exist
+
 plot_titanvortex_HC3N.dat		HC3N vmr data from Teanby et al 2019, GRL
+
 plot_titanvortex_HC3N.dat.grd		gridded version in GMT .grd format
+
 plot_titanvortex_PV_0.1mbar.dat	PV at 0.1mbar/0.1hPa from Sharkey et al 2021, Icarus
+
 plot_titanvortex_PV_0.1mbar.dat.grd	gridded version in GMT .grd format
+
 plot_titanvortex_T_1mbar.dat		Temperature at 1mbar/1hPa from Sharkey et al 2021, Icarus
+
 plot_titanvortex_T_1mbar.dat.grd	gridded version in GMT .grd format
+
 plot_titanvortex_northvortex.txt	Dashed line showing northern vortex edge
+
 plot_titanvortex_southvortex.txt	Dashed line showing southern vortex edge
+
 plot_titanvortex_yls.labels		Ls labels
+
 plot_titanvortex_yls.ticks		Ls ticks
 
 References:
