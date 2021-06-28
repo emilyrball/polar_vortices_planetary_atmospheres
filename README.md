@@ -19,3 +19,39 @@ Various useful functions, including Lait-scaling for potential vorticity.
 ## calculate_PV_venus.py
 Calculates PV from AFES-Venus reanalysis data.
 
+## plot_titanvortex.gmt
+GMT shell script to plot figure 6
+
+plot_titanvortex.gmt			main GMT plotting script
+
+plot_titanvortex.poly			mask for regions where observations exist
+plot_titanvortex_HC3N.dat		HC3N vmr data from Teanby et al 2019, GRL
+plot_titanvortex_HC3N.dat.grd		gridded version in GMT .grd format
+plot_titanvortex_PV_0.1mbar.dat	PV at 0.1mbar/0.1hPa from Sharkey et al 2021, Icarus
+plot_titanvortex_PV_0.1mbar.dat.grd	gridded version in GMT .grd format
+plot_titanvortex_T_1mbar.dat		Temperature at 1mbar/1hPa from Sharkey et al 2021, Icarus
+plot_titanvortex_T_1mbar.dat.grd	gridded version in GMT .grd format
+plot_titanvortex_northvortex.txt	Dashed line showing northern vortex edge
+plot_titanvortex_southvortex.txt	Dashed line showing southern vortex edge
+plot_titanvortex_yls.labels		Ls labels
+plot_titanvortex_yls.ticks		Ls ticks
+
+References:
+
+Data is extracted from the following two publications:
+
+1) Sharkey J., Teanby N.A., Sylvestre M., Mitchell D.M., Seviour W.J.M., Nixon C.A., Irwin P.G.J., 2021, 'Potential vorticity structure of Titan's polar vortices from Cassini CIRS observations', Icarus, 354, 114030. doi:10.1016/j.icarus.2020.114030
+
+Full dataset available at: 
+https://data.mendeley.com/datasets/wn8j8f8ck7/1
+
+2) Teanby N.A., Sylvestre M., Sharkey J., Nixon C.A., Vinatier S., Irwin P.G.J., 2019, 'Seasonal Evolution of Titan's Stratosphere During the Cassini Mission', Geophysical Research Letters, 46, 3079. doi:10.1029/2018GL081401
+
+The paper is open access and the full datasets are available from the 'Supporting Information' at:
+https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2018GL081401
+
+Software:
+
+GMT plotting software is freely available from:
+
+https://www.generic-mapping-tools.org
