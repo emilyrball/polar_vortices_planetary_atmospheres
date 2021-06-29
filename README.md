@@ -1,5 +1,5 @@
 # polar_vortices_planetary_atmos
-Enclosed are the (Python) scripts used to plot Figures 1, 5, 6 and 9 in Mitchell et al. (2021) Polar vortices in planetary atmospheres.
+Enclosed are the Python scripts used to plot Figures 1, 5, and 9, and the GMT script to plot Figure 6 in Mitchell et al. (2021) "Polar vortices in planetary atmospheres".
 
 ## planetary_polar_vortices_cross_section.py
 Plots Figure 1. Data used for Venus were provided by Norihiko Sugimoto, and the relevant paper is Sugimoto et al. (2019) Impact of Data Assimilation on THermal Tides in the Case of Venus Express Wind Observation (https://doi.org/10.1029/2019GL082700). Data used for Earth are from ERA5 (https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form) and for Mars fom OpenMARS (https://ordo.open.ac.uk/collections/OpenMARS_database/4278950/1). The data used to plot the polar vortices on Titan were provided to us by Jason Sharkey, and the relevant paper is Sharkey et al. (2021) Potential Vorticity Structure in Titan's Polar Vortices from Cassini CIRS Observations (https://doi.org/10.1016/j.icarus.2020.114030).
@@ -20,31 +20,31 @@ Various useful functions, including Lait-scaling for potential vorticity.
 Calculates PV from AFES-Venus reanalysis data.
 
 ## plot_titanvortex.gmt
-GMT shell script to plot figure 6
+GMT shell script to plot Figure 6
 
-plot_titanvortex.gmt			main GMT plotting script
+plot_titanvortex.gmt, main GMT plotting script
 
-plot_titanvortex.poly			mask for regions where observations exist
+plot_titanvortex.poly, mask for regions where observations exist
 
-plot_titanvortex_HC3N.dat		HC3N vmr data from Teanby et al 2019, GRL
+plot_titanvortex_HC3N.dat, HC3N vmr data from Teanby et al 2019, GRL
 
-plot_titanvortex_HC3N.dat.grd		gridded version in GMT .grd format
+plot_titanvortex_HC3N.dat.grd, gridded version in GMT .grd format
 
-plot_titanvortex_PV_0.1mbar.dat	PV at 0.1mbar/0.1hPa from Sharkey et al 2021, Icarus
+plot_titanvortex_PV_0.1mbar.dat, PV at 0.1mbar/0.1hPa from Sharkey et al 2021, Icarus
 
-plot_titanvortex_PV_0.1mbar.dat.grd	gridded version in GMT .grd format
+plot_titanvortex_PV_0.1mbar.dat.grd, gridded version in GMT .grd format
 
-plot_titanvortex_T_1mbar.dat		Temperature at 1mbar/1hPa from Sharkey et al 2021, Icarus
+plot_titanvortex_T_1mbar.dat, Temperature at 1mbar/1hPa from Sharkey et al 2021, Icarus
 
-plot_titanvortex_T_1mbar.dat.grd	gridded version in GMT .grd format
+plot_titanvortex_T_1mbar.dat.grd, gridded version in GMT .grd format
 
-plot_titanvortex_northvortex.txt	Dashed line showing northern vortex edge
+plot_titanvortex_northvortex.txt, Dashed line showing northern vortex edge
 
-plot_titanvortex_southvortex.txt	Dashed line showing southern vortex edge
+plot_titanvortex_southvortex.txt, Dashed line showing southern vortex edge
 
-plot_titanvortex_yls.labels		Ls labels
+plot_titanvortex_yls.labels, Ls labels
 
-plot_titanvortex_yls.ticks		Ls ticks
+plot_titanvortex_yls.ticks, Ls ticks
 
 References:
 
